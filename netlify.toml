@@ -1,0 +1,16 @@
+# Netlify build + SPA routing for Beginnings.
+# Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in
+# Netlify → Site settings → Environment variables before deploying.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Single-page app: route every path back to index.html so React Router works.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

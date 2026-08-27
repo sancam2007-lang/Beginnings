@@ -1,0 +1,256 @@
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap');
+
+/* =========================================================================
+   Beginnings — visual language: a government desk from ~1890.
+   Palette (from the brief): aged paper, dark ink, walnut desk, oxblood
+   stamps, faded administrative blue/green.
+   ========================================================================= */
+:root {
+  --paper:        #ece2c8;
+  --paper-edge:   #d8caa2;
+  --manila:       #d3bd8c;
+  --ink:          #241f18;
+  --ink-faded:    #5b5140;
+  --desk:         #3a2f24;
+  --desk-dark:    #2a2019;
+  --blotter:      #33443a;
+  --blotter-dk:   #26332b;
+  --oxblood:      #93221f;
+  --oxblood-soft: #a8433f;
+  --admin-blue:   #34566b;
+  --admin-green:  #3d5a45;
+  --gold:         #a98a3c;
+
+  --font-display: "IM Fell English", Georgia, "Times New Roman", serif;
+  --font-type:    "Special Elite", "Courier New", Courier, monospace;
+  --shadow-paper: 0 1px 2px rgba(0,0,0,.25), 0 10px 24px rgba(0,0,0,.35);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; margin: 0; }
+
+body {
+  font-family: var(--font-display);
+  color: var(--ink);
+  background: var(--desk-dark);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Desk surface -------------------------------------------------------- */
+.desk {
+  position: relative;
+  min-height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgba(255,240,200,.06), transparent 60%),
+    repeating-linear-gradient(96deg, rgba(0,0,0,.06) 0 3px, transparent 3px 9px),
+    linear-gradient(180deg, var(--desk) 0%, var(--desk-dark) 100%);
+}
+.desk::after {
+  content: "";
+  position: absolute; inset: 0;
+  box-shadow: inset 0 0 220px rgba(0,0,0,.6);
+  pointer-events: none;
+}
+
+/* Nameplate / bureau header */
+.bureau-bar {
+  position: relative; z-index: 5;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 14px 22px;
+  background: linear-gradient(180deg, #241b14, #1c150f);
+  border-bottom: 2px solid var(--gold);
+  color: var(--paper);
+}
+.bureau-bar h1 {
+  font-size: 20px; letter-spacing: .16em; text-transform: uppercase;
+  margin: 0; font-weight: 400;
+}
+.bureau-bar .sub { font-family: var(--font-type); font-size: 11px; color: var(--gold); letter-spacing: .1em; }
+.bureau-bar .spacer { flex: 1; }
+
+/* ---- Desk objects (the environment is the navigation) -------------------- */
+.desk-tray {
+  position: relative; z-index: 3;
+  display: flex; flex-wrap: wrap; gap: 14px;
+  padding: 26px; max-width: 1100px; margin: 0 auto;
+}
+.desk-object {
+  width: 150px; min-height: 132px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; padding: 16px 12px; cursor: pointer;
+  color: var(--paper); text-align: center;
+  background:
+    linear-gradient(180deg, rgba(255,240,205,.05), rgba(0,0,0,.12)),
+    var(--blotter);
+  border: 1px solid rgba(0,0,0,.4);
+  border-radius: 2px;
+  box-shadow: 0 2px 0 rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.05);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.desk-object:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0,0,0,.4); }
+.desk-object:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.desk-object .glyph { font-size: 34px; line-height: 1; }
+.desk-object .label { font-family: var(--font-type); font-size: 12px; letter-spacing: .06em; }
+.desk-object .count {
+  font-family: var(--font-type); font-size: 11px; color: var(--paper);
+  background: var(--oxblood); border-radius: 10px; padding: 1px 8px;
+}
+
+/* ---- Paper documents ----------------------------------------------------- */
+.paper {
+  position: absolute;
+  width: min(440px, 92vw);
+  background: var(--paper);
+  background-image:
+    linear-gradient(180deg, rgba(255,255,255,.25), transparent 12%),
+    repeating-linear-gradient(0deg, transparent 0 27px, rgba(90,70,40,.06) 27px 28px);
+  color: var(--ink);
+  border: 1px solid var(--paper-edge);
+  box-shadow: var(--shadow-paper);
+  border-radius: 1px;
+  display: flex; flex-direction: column;
+  max-height: 82vh;
+}
+.paper--folder { background: var(--manila); }
+.paper__header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; cursor: grab;
+  border-bottom: 1px double var(--ink-faded);
+  background: linear-gradient(180deg, rgba(0,0,0,.05), transparent);
+  touch-action: none;
+}
+.paper__header:active { cursor: grabbing; }
+.paper__title {
+  font-family: var(--font-type); font-size: 12px; letter-spacing: .1em;
+  text-transform: uppercase; flex: 1; color: var(--ink-faded);
+}
+.paper__file {
+  border: 1px solid var(--ink-faded); background: transparent; color: var(--ink-faded);
+  font-family: var(--font-type); font-size: 11px; cursor: pointer;
+  padding: 2px 8px; border-radius: 1px;
+}
+.paper__file:hover { background: var(--ink-faded); color: var(--paper); }
+.paper__body { padding: 18px 20px; overflow: auto; }
+
+.doc-seal {
+  text-align: center; font-family: var(--font-type); font-size: 11px;
+  letter-spacing: .28em; color: var(--oxblood); text-transform: uppercase;
+  border-bottom: 2px solid var(--oxblood); padding-bottom: 6px; margin-bottom: 14px;
+}
+.doc-h { font-size: 22px; margin: 0 0 4px; }
+.doc-meta { font-family: var(--font-type); font-size: 11px; color: var(--ink-faded); margin-bottom: 14px; }
+
+/* Ledger rows for records / lists */
+.ledger { width: 100%; border-collapse: collapse; font-family: var(--font-type); font-size: 13px; }
+.ledger td, .ledger th { text-align: left; padding: 7px 6px; border-bottom: 1px solid rgba(90,70,40,.35); }
+.ledger th { color: var(--ink-faded); text-transform: uppercase; font-size: 10px; letter-spacing: .1em; }
+.ledger tr.unread td { font-weight: bold; }
+
+/* Typed form fields printed onto paper */
+.field { margin-bottom: 14px; }
+.field > label {
+  display: block; font-family: var(--font-type); font-size: 11px;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--ink-faded); margin-bottom: 4px;
+}
+.field input, .field textarea, .field select {
+  width: 100%; font-family: var(--font-type); font-size: 14px; color: var(--ink);
+  background: transparent; border: none; border-bottom: 1px solid var(--ink-faded);
+  padding: 5px 2px; border-radius: 0;
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  outline: none; border-bottom-color: var(--oxblood);
+  background: rgba(147,34,31,.05);
+}
+.field textarea { min-height: 84px; resize: vertical; }
+.field--check { display: flex; gap: 8px; align-items: flex-start; }
+.field--check input { width: auto; }
+
+/* Buttons: stamps, tabs, actions */
+.btn {
+  font-family: var(--font-type); font-size: 12px; letter-spacing: .08em;
+  text-transform: uppercase; cursor: pointer;
+  padding: 9px 16px; border-radius: 1px;
+  border: 1px solid var(--ink); background: var(--ink); color: var(--paper);
+  transition: transform .08s ease, opacity .12s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn--stamp { background: var(--oxblood); border-color: var(--oxblood); }
+.btn--ghost { background: transparent; color: var(--ink); }
+.btn-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+
+.note {
+  font-family: var(--font-type); font-size: 12px; color: var(--ink-faded);
+  border-left: 3px solid var(--admin-blue); padding: 6px 10px; margin: 12px 0;
+  background: rgba(52,86,107,.07);
+}
+.note--error { border-left-color: var(--oxblood); background: rgba(147,34,31,.07); color: #6d1f1c; }
+
+/* ---- Rubber stamp (signature element) ------------------------------------ */
+.stamp {
+  display: inline-block; font-family: var(--font-type);
+  color: var(--oxblood); border: 3px double var(--oxblood);
+  padding: 6px 14px; letter-spacing: .18em; text-transform: uppercase;
+  transform: rotate(-8deg); opacity: .86; font-size: 22px;
+  mix-blend-mode: multiply; text-align: center; line-height: 1.1;
+  box-shadow: 0 0 0 1px rgba(147,34,31,.25) inset;
+}
+.stamp small { display: block; font-size: 10px; letter-spacing: .1em; opacity: .8; }
+@keyframes thud {
+  0% { transform: rotate(-8deg) scale(2.4); opacity: 0; }
+  60% { transform: rotate(-8deg) scale(.92); opacity: .95; }
+  100% { transform: rotate(-8deg) scale(1); opacity: .86; }
+}
+.stamp--thud { animation: thud .32s cubic-bezier(.2,.8,.2,1) both; }
+
+/* ---- Immersive login counter --------------------------------------------- */
+.counter {
+  min-height: 100%; display: grid; place-items: center; padding: 24px;
+  background:
+    radial-gradient(90% 60% at 50% 0%, rgba(255,240,200,.05), transparent),
+    linear-gradient(180deg, var(--desk), var(--desk-dark));
+}
+.counter__card {
+  width: min(420px, 94vw); background: var(--paper);
+  border: 1px solid var(--paper-edge); box-shadow: var(--shadow-paper);
+  padding: 30px 28px;
+}
+.counter__crest { text-align: center; margin-bottom: 6px; }
+.counter__crest .ring {
+  width: 58px; height: 58px; margin: 0 auto 10px; border-radius: 50%;
+  border: 2px double var(--oxblood); display: grid; place-items: center;
+  color: var(--oxblood); font-family: var(--font-type); font-size: 22px;
+}
+.counter h2 { text-align: center; margin: 0 0 2px; font-size: 26px; letter-spacing: .04em; }
+.counter .tagline {
+  text-align: center; font-family: var(--font-type); font-size: 11px;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--ink-faded); margin-bottom: 22px;
+}
+.linkish {
+  background: none; border: none; color: var(--admin-blue); cursor: pointer;
+  font-family: var(--font-type); font-size: 12px; text-decoration: underline; padding: 0;
+}
+
+.center-wait {
+  min-height: 100%; display: grid; place-items: center;
+  color: var(--paper); font-family: var(--font-type); letter-spacing: .1em;
+}
+
+/* ---- Mobile: papers become a stacked document viewer --------------------- */
+@media (max-width: 720px) {
+  .paper { position: static; width: 100%; max-height: none; margin: 0 0 14px; }
+  .paper__header { cursor: default; }
+  .desk-tray { padding: 16px; }
+  .desk-object { width: calc(50% - 7px); }
+  .mobile-sheet {
+    position: fixed; inset: 0; z-index: 40; overflow: auto;
+    padding: 14px; background: linear-gradient(180deg, var(--desk), var(--desk-dark));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp--thud { animation: none; }
+  .desk-object { transition: none; }
+}
