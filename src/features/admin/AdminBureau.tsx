@@ -2,7 +2,6 @@ import { useState } from "react";
 import { UsersPanel } from "./UsersPanel";
 import { RegionsPanel } from "./RegionsPanel";
 import { OfficesPanel } from "./OfficesPanel";
-import { TemplatesPanel } from "./TemplatesPanel";
 import { ElectionsPanel } from "./ElectionsPanel";
 import { EventsPanel } from "./EventsPanel";
 import { ReviewPanel } from "./ReviewPanel";
@@ -11,14 +10,13 @@ import { AurorsPanel } from "./AurorsPanel";
 import { AnnouncementsPanel } from "./AnnouncementsPanel";
 
 type TabId =
-  | "users" | "regions" | "offices" | "templates"
+  | "users" | "regions" | "offices"
   | "elections" | "events" | "review" | "missions" | "aurors" | "notices";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "users", label: "Citizens" },
   { id: "regions", label: "Regions" },
   { id: "offices", label: "Offices & Powers" },
-  { id: "templates", label: "Forms" },
   { id: "elections", label: "Elections" },
   { id: "events", label: "Events" },
   { id: "review", label: "Submissions" },
@@ -44,7 +42,6 @@ export function AdminBureau() {
           {tab === "users" ? <UsersPanel /> : null}
           {tab === "regions" ? <RegionsPanel /> : null}
           {tab === "offices" ? <OfficesPanel /> : null}
-          {tab === "templates" ? <TemplatesPanel /> : null}
           {tab === "elections" ? <ElectionsPanel /> : null}
           {tab === "events" ? <EventsPanel /> : null}
           {tab === "review" ? <ReviewPanel /> : null}

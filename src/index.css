@@ -507,3 +507,28 @@ body {
 .stamp-picker { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 10px; }
 .stamp-btn { font-family: var(--font-type); font-size: 12px; letter-spacing: .05em; text-transform: uppercase; padding: 6px 12px; border: 1px solid var(--ink-faded); background: transparent; color: var(--ink); cursor: pointer; border-radius: 2px; }
 .stamp-btn.is-on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* form designer */
+.designer__bar { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.designer__grid { display: grid; grid-template-columns: 260px 1fr; gap: 16px; }
+.designer__panel { max-height: 70vh; overflow: auto; padding-right: 6px; }
+.designer__stage { display: flex; justify-content: center; align-items: flex-start; }
+.designer__canvas {
+  position: relative; width: 100%; max-width: 560px;
+  background-size: 100% 100%; background-repeat: no-repeat;
+  border: 1px solid var(--paper-edge); box-shadow: var(--shadow-paper);
+  touch-action: none; user-select: none;
+}
+.dfield {
+  position: absolute; box-sizing: border-box; cursor: move;
+  border: 1px dashed rgba(60,40,20,.5); background: rgba(255,255,255,.28);
+  display: flex; align-items: center; padding: 0 4px; overflow: hidden;
+}
+.dfield.is-sel { border: 1.5px solid var(--oxblood); background: rgba(147,34,31,.1); }
+.dfield__label { font-family: var(--font-type); color: var(--ink); pointer-events: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dfield__handle { position: absolute; right: -6px; bottom: -6px; width: 12px; height: 12px; background: var(--oxblood); border: 2px solid var(--paper); border-radius: 2px; cursor: nwse-resize; }
+.bg-picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.bg-thumb { padding: 2px; border: 1px solid var(--ink-faded); background: #efe7d4; cursor: pointer; border-radius: 2px; }
+.bg-thumb.is-on { border: 2px solid var(--oxblood); }
+.bg-thumb img { width: 100%; height: 46px; object-fit: cover; display: block; }
+@media (max-width: 720px) { .designer__grid { grid-template-columns: 1fr; } }
