@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ledger — Beginnings Exchange</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main>
+    <h1 id="greeting">Ledger</h1>
+    <p class="muted" id="subtitle">Your accounts with the counting-house.</p>
+
+    <div class="grid">
+      <!-- Balances -->
+      <section class="panel">
+        <h2>Purse</h2>
+        <ul class="purse" id="purse"><li class="muted">Loading…</li></ul>
+        <div class="purse-total"><span>Total worth</span><span class="mono" id="purse-total">—</span></div>
+      </section>
+
+      <!-- Send money -->
+      <section class="panel">
+        <h2>Send Money</h2>
+        <form id="send-form">
+          <label for="send-to">Pay to</label>
+          <select id="send-to" required></select>
+          <label for="send-cur">Currency</label>
+          <select id="send-cur"></select>
+          <div class="row">
+            <div><label for="send-whole" id="send-whole-label">Whole</label><input id="send-whole" type="number" min="0" placeholder="0"></div>
+            <div><label for="send-sub" id="send-sub-label">Sub-units</label><input id="send-sub" type="number" min="0" placeholder="0"></div>
+          </div>
+          <label for="send-memo">Memo <span class="small">(optional)</span></label>
+          <input id="send-memo" maxlength="140" placeholder="For forty bushels of barley">
+          <div class="actions"><button type="submit">Send</button></div>
+        </form>
+      </section>
+
+      <!-- Money-changer -->
+      <section class="panel" id="ex-panel">
+        <h2>Money-Changer</h2>
+        <p class="muted small" id="fee-note">Swap one currency for another at today's rates.</p>
+        <form id="ex-form">
+          <label for="ex-from">Give</label><select id="ex-from"></select>
+          <label for="ex-to">Receive</label><select id="ex-to"></select>
+          <div class="row">
+            <div><label for="ex-whole" id="ex-whole-label">Whole</label><input id="ex-whole" type="number" min="0" placeholder="0"></div>
+            <div><label for="ex-sub" id="ex-sub-label">Sub-units</label><input id="ex-sub" type="number" min="0" placeholder="0"></div>
+          </div>
+          <p class="quote" id="ex-quote">—</p>
+          <div class="actions"><button type="submit" id="ex-submit">Exchange</button></div>
+        </form>
+      </section>
+
+      <!-- Holdings -->
+      <section class="panel">
+        <h2>Holdings</h2>
+        <div id="holdings"><p class="muted">Loading…</p></div>
+        <p class="small" style="margin-top:.6rem"><a href="shop.html">Goods Shop →</a> · <a href="companies.html">Your companies →</a></p>
+      </section>
+
+      <!-- Give goods -->
+      <section class="panel">
+        <h2>Give Goods</h2>
+        <p class="muted small">Hand something from your pack to another player.</p>
+        <form id="give-form">
+          <label for="give-to">Give to</label>
+          <select id="give-to" required></select>
+          <div class="row">
+            <div style="flex:2"><label for="give-good">Item</label><select id="give-good" required></select></div>
+            <div><label for="give-qty">Qty</label><input id="give-qty" type="number" min="1" value="1" required></div>
+          </div>
+          <label for="give-memo">Memo <span class="small">(optional)</span></label>
+          <input id="give-memo" maxlength="140">
+          <div class="actions"><button type="submit">Give</button></div>
+        </form>
+      </section>
+
+      <!-- History -->
+      <section class="panel wide">
+        <h2>Transactions</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Entry</th><th class="num">Amount</th></tr></thead>
+            <tbody id="tx-rows"><tr><td colspan="3" class="muted">Loading…</td></tr></tbody>
+          </table>
+        </div>
+        <button class="ghost small more hidden" id="tx-more">Older entries</button>
+      </section>
+
+      <!-- Goods log -->
+      <section class="panel wide">
+        <h2>Goods Log</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Entry</th><th class="num">Qty</th></tr></thead>
+            <tbody id="item-rows"><tr><td colspan="3" class="muted">Loading…</td></tr></tbody>
+          </table>
+        </div>
+        <button class="ghost small more hidden" id="item-more">Older entries</button>
+      </section>
+
+      <!-- Currencies -->
+      <section class="panel wide">
+        <h2>Currencies of the Realm</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Currency</th><th>Code</th><th>Divided into</th><th class="num">Rate</th></tr></thead>
+            <tbody id="currency-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Account -->
+      <section class="panel">
+        <h2>Account</h2>
+        <dl class="kv small" id="acct-info"></dl>
+        <h3 class="small" style="margin:.9rem 0 .2rem">Change password</h3>
+        <form id="pw-form">
+          <label for="pw-current">Current password</label>
+          <input id="pw-current" type="password" autocomplete="current-password" required>
+          <label for="pw-new">New password</label>
+          <input id="pw-new" type="password" autocomplete="new-password" required minlength="8">
+          <label for="pw-again">New password again</label>
+          <input id="pw-again" type="password" autocomplete="new-password" required minlength="8">
+          <div class="actions"><button type="submit">Change Password</button></div>
+        </form>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="js/ledger.js"></script>
+</body>
+</html>

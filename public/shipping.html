@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shipping — Beginnings Exchange</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main>
+    <h1>Shipping</h1>
+    <p class="muted">Goods don't teleport. Send them from one of your warehouses or depots to a depot in another town.
+      You choose how fast (<span id="lim-days">5–10</span> days): the faster, the dearer the freight. They arrive when time reaches the arrival day.</p>
+
+    <div class="grid">
+      <section class="panel">
+        <h2>Send a Shipment</h2>
+        <form id="ship-form" autocomplete="off">
+          <label for="f-from">From</label><select id="f-from"></select>
+          <div id="f-cargo" class="cargo-lines"></div>
+          <button type="button" class="ghost small" id="f-add">+ Another good</button>
+          <label for="f-to" style="margin-top:.6rem">To</label><select id="f-to"></select>
+          <p class="small muted" id="f-to-note"></p>
+          <label for="f-days">Shipping time: <strong id="f-days-out">10 days</strong></label>
+          <input type="range" id="f-days" min="5" max="10" step="1" value="10">
+          <div class="small muted range-ends"><span id="f-fast">5 days · dearer</span><span id="f-slow">10 days · cheaper</span></div>
+          <p class="small" id="f-cost"></p>
+          <div class="actions"><button type="submit" id="f-go">Send Shipment</button></div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>On the Way</h2>
+        <div id="open-ships"><p class="muted">Loading…</p></div>
+      </section>
+
+      <section class="panel wide">
+        <h2>Delivered</h2>
+        <div id="done-ships"></div>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="js/shipping.js"></script>
+</body>
+</html>
