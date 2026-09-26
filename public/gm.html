@@ -1,0 +1,1147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GM Console — Beginnings Exchange</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main>
+    <h1>GM Console</h1>
+    <nav class="gm-tabs" role="tablist">
+      <button type="button" data-tab="time">Time</button>
+      <button type="button" data-tab="treasury">Treasury</button>
+      <button type="button" data-tab="world">World</button>
+      <button type="button" data-tab="companies">Companies</button>
+      <button type="button" data-tab="npc">NPCs</button>
+      <button type="button" data-tab="labor">Labor</button>
+      <button type="button" data-tab="resources">Resources</button>
+      <button type="button" data-tab="construction">Construction</button>
+      <button type="button" data-tab="buildings">Buildings</button>
+      <button type="button" data-tab="realestate">Real Estate</button>
+      <button type="button" data-tab="shipping">Shipping</button>
+      <button type="button" data-tab="exchange">Exchange</button>
+      <button type="button" data-tab="markets">Markets</button>
+      <button type="button" data-tab="currencies">Currencies</button>
+      <button type="button" data-tab="accounts">Accounts</button>
+      <button type="button" data-tab="settings">Settings</button>
+    </nav>
+
+    <!-- ═════════════ TIME ═════════════ -->
+    <div class="tab-panel" id="tab-time">
+      <div class="grid">
+        <section class="panel wide">
+          <h2>The Date</h2>
+          <p class="date-big" id="t-date">…</p>
+          <p class="date-sub" id="t-daynum"></p>
+          <p class="date-sub" id="t-session" style="margin-top:-.6rem"></p>
+          <div class="advance-row">
+            <button data-days="1">+1 Day</button>
+            <button data-days="7">+1 Week</button>
+            <button data-days="month" id="t-month-btn">+1 Month</button>
+          </div>
+          <form id="t-custom" class="row" style="max-width:560px;margin:1rem auto 0;align-items:flex-end">
+            <div style="flex:0 0 7rem"><label for="t-days">Days</label><input id="t-days" type="number" min="1" max="3650" value="3"></div>
+            <div><label for="t-note">Note <span class="small">(optional)</span></label><input id="t-note" maxlength="140" placeholder="The fleet sails for Port Varn"></div>
+            <div style="flex:0 0 auto"><button type="submit">Advance</button></div>
+          </form>
+          <ul class="tick-summary hidden" id="t-summary"></ul>
+          <p class="muted small" style="text-align:center;margin-top:1rem">
+            Advancing time runs the whole economy: wages, construction supply, production, hauling, shipments arriving, markets and company valuations.
+          </p>
+        </section>
+
+        <section class="panel wide">
+          <h2>Money Since the Last Advance</h2>
+          <p class="muted small">How much money exists, and how much has been created or destroyed since time last moved.
+            Watch "net" — large positive numbers every advance mean inflation.</p>
+          <div id="t-econ"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Set the Date</h2>
+          <p class="muted small">Jump straight to a date (forward or back). This does <em>not</em> run the market simulation.</p>
+          <form id="t-set">
+            <div class="row">
+              <div><label for="t-set-day">Day</label><input id="t-set-day" type="number" min="1" required></div>
+              <div style="flex:2"><label for="t-set-month">Month</label><select id="t-set-month"></select></div>
+              <div><label for="t-set-year">Year</label><input id="t-set-year" type="number" required></div>
+            </div>
+            <div class="actions"><button type="submit">Set Date</button></div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Time Log</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>From → To</th><th>Note</th></tr></thead>
+              <tbody id="t-log"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel wide">
+          <h2>Calendar</h2>
+          <p class="muted small">Name your months and set their lengths. Changing these re-labels the current date but never moves time.</p>
+          <form id="cal-form">
+            <div class="row" style="max-width:420px">
+              <div><label for="cal-epoch">First year</label><input id="cal-epoch" type="number" required></div>
+              <div><label for="cal-era">Era suffix</label><input id="cal-era" maxlength="12" placeholder="AC"></div>
+            </div>
+            <label>Months <span class="small" id="cal-yearlen"></span></label>
+            <div class="cal-months" id="cal-months"></div>
+            <div class="actions">
+              <button type="button" class="ghost small" id="cal-add">+ Add month</button>
+              <button type="button" class="ghost small" id="cal-remove">− Remove last</button>
+            </div>
+            <div class="actions"><button type="submit">Save Calendar</button></div>
+          </form>
+          <form id="sess-form" class="row tight" style="align-items:flex-end;gap:.8rem;margin-top:1.2rem;flex-wrap:wrap">
+            <div><label for="sess-days">Days per session</label><input id="sess-days" type="number" min="1" max="3650" style="width:8rem"></div>
+            <div><button type="submit">Save</button></div>
+            <p class="muted small" style="flex-basis:100%;margin:.2rem 0 0">1 Session = 3 in-game months in the handbook. Wages and production are counted per session.</p>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- ═════════════ TREASURY ═════════════ -->
+    <div class="tab-panel" id="tab-treasury">
+      <div class="grid">
+        <section class="panel">
+          <h2>Issue or Collect</h2>
+          <form id="m-form">
+            <label for="m-action">Action</label>
+            <select id="m-action">
+              <option value="grant">Grant — pay money out of the Crown</option>
+              <option value="seize">Seize — take money back</option>
+              <option value="set">Set balance — make it exactly this</option>
+            </select>
+            <label for="m-user">Account</label>
+            <select id="m-user"></select>
+            <label for="m-cur">Currency</label>
+            <select id="m-cur"></select>
+            <div class="row">
+              <div><label for="m-whole" id="m-whole-label">Whole</label><input id="m-whole" type="number" min="0" placeholder="0"></div>
+              <div><label for="m-sub" id="m-sub-label">Sub-units</label><input id="m-sub" type="number" min="0" placeholder="0"></div>
+            </div>
+            <label for="m-memo">Memo <span class="small">(shown to the player)</span></label>
+            <input id="m-memo" maxlength="140" placeholder="Bounty for the Marsh Road bandits">
+            <div class="actions"><button type="submit" id="m-submit">Grant</button></div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Balances</h2>
+          <div class="table-wrap">
+            <table class="matrix">
+              <thead id="bal-head"></thead>
+              <tbody id="bal-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel wide">
+          <h2>Ledger</h2>
+          <div class="row tight" style="align-items:flex-end;margin-bottom:.6rem">
+            <div style="min-width:240px"><label for="l-filter">Show</label><select id="l-filter"></select></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Date</th><th>Kind</th><th>From → To</th><th class="num">Amount</th><th></th></tr></thead>
+              <tbody id="l-rows"></tbody>
+            </table>
+          </div>
+          <button class="ghost small more hidden" id="l-more">Older entries</button>
+        </section>
+        <section class="panel">
+          <h2>Items</h2>
+          <form id="it-form">
+            <div class="row">
+              <div><label for="it-action">Action</label>
+                <select id="it-action"><option value="grant">Grant items</option><option value="seize">Seize items</option></select></div>
+              <div><label for="it-user">Account</label><select id="it-user"></select></div>
+            </div>
+            <label for="it-pile">Stockpile</label><select id="it-pile"></select>
+            <div class="row">
+              <div style="flex:2"><label for="it-good">Good</label><select id="it-good"></select></div>
+              <div><label for="it-qty">Qty</label><input id="it-qty" type="number" min="1" value="1"></div>
+            </div>
+            <label for="it-memo">Memo</label><input id="it-memo" maxlength="140" placeholder="Salvage from the wreck">
+            <div class="actions"><button type="submit" id="it-submit">Grant</button></div>
+          </form>
+          <h3 style="margin-top:1rem" id="it-hold-title">Holdings</h3>
+          <div id="it-holdings"></div>
+        </section>
+
+        <section class="panel wide">
+          <h2>Goods Log</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Entry</th><th class="num">Qty</th></tr></thead>
+              <tbody id="it-log"></tbody>
+            </table>
+          </div>
+          <button class="ghost small more hidden" id="it-more">Older entries</button>
+        </section>
+      </div>
+    </div>
+
+    <!-- ═════════════ WORLD ═════════════ -->
+    <div class="tab-panel" id="tab-world">
+      <div class="grid">
+        <section class="panel wide">
+          <h2>Settlements</h2>
+          <p class="muted small">The physical places of the world. Markets, warehouses, labor, resource nodes and facilities all belong to a settlement.
+            Changing a settlement's population recomputes its labor pool; anyone on a player payroll stays employed.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Settlement</th><th>Island</th><th class="num">Population</th><th class="num">Working age</th><th>Markets</th><th class="num">Stockpiles</th><th></th></tr></thead>
+              <tbody id="st-rows"></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="panel">
+          <h2 id="st-form-title">Found a Settlement</h2>
+          <form id="st-form">
+            <input type="hidden" id="st-id">
+            <div class="row">
+              <div style="flex:2"><label for="st-name">Name</label><input id="st-name" required maxlength="40" placeholder="Port Varn"></div>
+              <div><label for="st-island">Island</label><input id="st-island" maxlength="40"></div>
+            </div>
+            <div class="row">
+              <div><label for="st-pop">Population</label><input id="st-pop" type="number" min="0" value="0"></div>
+              <div><label for="st-wa">Working age (%)</label><input id="st-wa" type="number" min="0" max="100" step="any" value="60"></div>
+              <div><label for="st-sort">Sort</label><input id="st-sort" type="number" value="0"></div>
+            </div>
+            <label for="st-desc">Description</label><input id="st-desc" maxlength="500">
+            <label class="inline-check" style="margin-top:.6rem"><input type="checkbox" id="st-active" checked> Active</label>
+            <div class="actions">
+              <button type="submit" id="st-submit">Found Settlement</button>
+              <button type="button" class="ghost hidden" id="st-cancel">Cancel Edit</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- ═════════════ COMPANIES ═════════════ -->
+    <div class="tab-panel" id="tab-companies">
+      <div class="grid">
+        <section class="panel wide">
+          <h2>Chartered Companies</h2>
+          <p class="muted small">Click a company to manage it: directors and officers, details, treasury, stockpiles and hauling.</p>
+          <div class="filter-row"><input type="search" id="co-filter" placeholder="Search companies or people…" aria-label="Search companies">
+            <button type="button" class="small" id="co-new">+ Charter a company</button></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Company</th><th>Home</th><th>Directors &amp; officers</th><th class="num">Treasury</th><th></th></tr></thead>
+              <tbody id="co-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel wide hidden" id="co-new-panel">
+          <h2 id="co-form-title">Charter a Company</h2>
+          <form id="co-form">
+            <input type="hidden" id="co-id">
+            <div class="row">
+              <div style="flex:3"><label for="co-name">Name</label><input id="co-name" required maxlength="60" placeholder="Varn Oost Compagnie"></div>
+              <div><label for="co-ticker">Ticker</label><input id="co-ticker" required maxlength="6" class="mono" placeholder="VOC"></div>
+              <div><label for="co-home">Home port</label><select id="co-home"></select></div>
+              <div><label for="co-kind">Run by</label>
+                <select id="co-kind"><option value="player">Players (officers)</option><option value="npc">NPCs</option></select></div>
+            </div>
+            <div class="row">
+              <div style="flex:2"><label for="co-desc">Description</label><input id="co-desc" maxlength="500"></div>
+              <div style="flex:2"><label for="co-charter">Charter terms</label>
+                <input id="co-charter" maxlength="2000" placeholder="Monopoly on trade east of the Varn Strait for 21 years…"></div>
+            </div>
+            <input type="checkbox" id="co-active" checked hidden>
+            <div class="actions">
+              <button type="submit" id="co-submit">Grant Charter</button>
+              <button type="button" class="ghost" id="co-cancel">Cancel</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel wide">
+          <h2>Warehouses &amp; Depots</h2>
+          <p class="muted small">Every located stockpile in the world. They are <strong>built through Construction</strong>; here you assign one to an owner and set its name, kind and capacity.</p>
+          <div class="filter-row"><input type="search" id="sp-filter" placeholder="Search stockpiles, owners, towns…" aria-label="Search stockpiles"></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Stockpile</th><th>Owner</th><th>Settlement</th><th class="num">Used / capacity</th><th></th></tr></thead>
+              <tbody id="sp-rows"></tbody>
+            </table>
+          </div>
+          <h3 style="margin-top:1.2rem" id="sp-form-title">Assign a Stockpile</h3>
+          <p class="muted small hidden" id="sp-none">Nothing to assign yet. Warehouses and depots are built in the <strong>Construction</strong> tab
+            (a project from a warehouse/depot blueprint); a finished workplace also comes with its own store.</p>
+          <form id="sp-form">
+            <input type="hidden" id="sp-id">
+            <div class="param-grid">
+              <div style="grid-column: span 2"><label for="sp-pick">Stockpile</label><select id="sp-pick" required></select></div>
+              <div><label for="sp-owner">Owner</label><select id="sp-owner"></select></div>
+              <div><label for="sp-place">Settlement</label><select id="sp-place" disabled title="A building stays where it was built"></select></div>
+              <div><label for="sp-name">Name</label><input id="sp-name" required maxlength="40" placeholder="Harbour Warehouse"></div>
+              <div><label for="sp-kind">Kind</label>
+                <select id="sp-kind"><option value="warehouse">Warehouse</option><option value="depot">Depot</option><option value="facility">Facility store</option><option value="other">Other</option></select></div>
+              <div><label for="sp-cap">Capacity (units)</label><input id="sp-cap" type="number" min="0" placeholder="unlimited"></div>
+              <div style="align-self:end"><label class="inline-check"><input type="checkbox" id="sp-active" checked> Active</label></div>
+            </div>
+            <p class="help" id="sp-origin"></p>
+            <div class="actions">
+              <button type="submit" id="sp-submit">Save Stockpile</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- ═════════════ NPC COMPANIES (script 12) ═════════════ -->
+    <div class="tab-panel" id="tab-npc">
+      <div class="grid">
+        <section class="panel wide">
+          <h2>NPC Companies</h2>
+          <p class="muted small">
+            Companies whose <strong>Run by</strong> is NPCs look after themselves every time you advance time:
+            they <strong>hire</strong> workers for their workplaces, <strong>stock their factories</strong> from their own depots and the bulk market,
+            then <strong>list</strong> what they produce on the town's bulk market, <strong>adjust their prices</strong> as it sells or doesn't,
+            and <strong>ship</strong> goods with no local market to a depot in a town that trades them. Nothing is spawned: every worker,
+            input and coin comes from somewhere. Click a company to change its behaviour or see everything about it.
+          </p>
+          <div class="filter-row"><input type="search" id="npc-filter" placeholder="Search NPC companies, towns, workplaces…" aria-label="Search NPC companies"></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Company</th><th>Workplaces</th><th class="num">Treasury</th><th class="num">On sale</th><th>Last advance</th></tr></thead>
+              <tbody id="npc-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel wide">
+          <h2>Behaviour for every NPC company</h2>
+          <p class="muted small">Sets these rules on <strong>all</strong> NPC companies at once (you can still fine-tune one from its profile).</p>
+          <form id="npc-all"></form>
+        </section>
+
+        <section class="panel wide">
+          <h2>Import NPC Companies</h2>
+          <p class="muted small">
+            One row per workplace; rows with the same <strong>Company</strong> build one company. Each workplace gets its own
+            <strong>&lt;Workplace&gt; Store</strong> (its inputs and outputs), and if you name a <strong>Depot</strong> the store hauls its outputs there.
+            Goods, resource nodes and recipes must already exist (Markets and Resources tabs). Workplaces that already exist are skipped,
+            so you can re-import a sheet after adding rows. If any row has a problem, nothing is imported.
+          </p>
+          <details class="small" style="margin:.4rem 0 .6rem">
+            <summary>Columns you can use</summary>
+            <div class="table-wrap"><table>
+              <thead><tr><th>Column</th><th>Meaning</th><th>Default</th></tr></thead>
+              <tbody>
+                <tr><td>Company</td><td>Company name. New companies are created NPC-run with their shares; existing NPC companies get the extra workplaces.</td><td>required</td></tr>
+                <tr><td>Ticker</td><td>2–6 letters/digits</td><td>made from the name</td></tr>
+                <tr><td>Town</td><td>Settlement the workplace is in</td><td>required</td></tr>
+                <tr><td>Workplace</td><td>Workplace name (Iron Hill Mine, Bloomery…)</td><td>required</td></tr>
+                <tr><td>Mode</td><td>extract (from a resource node) or process (runs a recipe)</td><td>required</td></tr>
+                <tr><td>Source</td><td>Extract: the resource node's name (or its good's name) in that town. Process: the recipe name.</td><td>required</td></tr>
+                <tr><td>Output</td><td>Base output per session at full staff (RU for mines, batches for factories)</td><td>required</td></tr>
+                <tr><td>General / Skilled / Specialist</td><td>Positions to staff</td><td>0</td></tr>
+                <tr><td>Size</td><td>Small Workshop, Large Workshop, Small/Medium/Large/Major Facility</td><td>Small Workshop</td></tr>
+                <tr><td>Store capacity</td><td>Units the workplace store holds</td><td>unlimited</td></tr>
+                <tr><td>Depot</td><td>Depot name in the same town to haul outputs to (created if new)</td><td>—</td></tr>
+                <tr><td>Cash</td><td>Starting capital for a <em>new</em> company, whole units of the base currency (added up over its rows)</td><td>0</td></tr>
+              </tbody>
+            </table></div>
+          </details>
+          <div class="actions" style="margin-top:0">
+            <button type="button" class="ghost small" id="ni-template">Download template (CSV)</button>
+            <label class="btn ghost small">Upload CSV… <input type="file" id="ni-file" accept=".csv,.tsv,.txt,text/csv" hidden></label>
+            <button type="button" class="ghost small" id="ni-clear">Clear</button>
+          </div>
+          <textarea id="ni-text" rows="6" class="mono" style="margin-top:.6rem;font-size:.85rem"
+            placeholder="Company&#9;Town&#9;Workplace&#9;Mode&#9;Source&#9;Output&#9;General&#9;Depot&#9;Cash&#10;Hillmen Mining&#9;Grand Market&#9;Iron Hill Mine&#9;extract&#9;Grand Iron Hill&#9;100&#9;10&#9;Hill Yard&#9;3000"></textarea>
+          <p class="small" id="ni-status"></p>
+          <ul class="small debit hidden" id="ni-errors" style="max-height:180px;overflow:auto"></ul>
+          <div class="table-wrap hidden" id="ni-preview-wrap" style="max-height:320px;overflow:auto">
+            <table><thead id="ni-head"></thead><tbody id="ni-rows"></tbody></table>
+          </div>
+          <div class="actions">
+            <button type="button" id="ni-check" disabled>Check</button>
+            <button type="button" id="ni-go" disabled>Import</button>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ═════════════ BUILDINGS ═════════════ -->
+    <div class="tab-panel" id="tab-buildings">
+      <div class="grid">
+        <section class="panel wide">
+          <h2>All Buildings</h2>
+          <p class="muted small">Every property in the world: workplaces (with their store), warehouses and depots, and other buildings,
+            whether finished through Construction, placed by you, set up by the NPC import, or from before the registry existed.
+            While a building is rented out, its tenant runs it; the owner keeps the title.</p>
+          <div class="filter-row">
+            <input type="search" id="bd-filter" placeholder="Search buildings, towns, owners…" aria-label="Search buildings">
+            <select id="bd-kind" aria-label="Kind"><option value="">All kinds</option><option value="workplace">Workplaces</option><option value="storage">Storage</option><option value="building">Other buildings</option></select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Building</th><th>Town</th><th>Owner</th><th>Status</th><th></th></tr></thead>
+              <tbody id="bd-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel hidden" id="bd-manage">
+          <h2 id="bd-manage-title">Manage</h2>
+          <p class="small muted" id="bd-manage-info"></p>
+          <form id="bd-edit">
+            <label for="bd-name">Name</label><input id="bd-name" maxlength="60" required>
+            <label for="bd-desc">Description</label><input id="bd-desc" maxlength="500" placeholder="optional, shown on the market">
+            <div class="actions"><button type="submit" class="small">Save</button></div>
+          </form>
+          <form id="bd-transfer" style="margin-top:1rem">
+            <label for="bd-owner">Give it to</label><select id="bd-owner"></select>
+            <p class="help">Its store must be empty, and it can't be rented out. Workers stay on for the new owner.</p>
+            <div class="actions"><button type="submit" class="small">Transfer</button>
+              <button type="button" class="ghost small" id="bd-close">Close</button></div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Place a Prebuilt Building</h2>
+          <p class="muted small">A ready-made building from a blueprint: no project, no materials. It belongs to the Crown unless you pick an owner.
+            Put Crown property on the market under <strong>Real Estate</strong>.</p>
+          <form id="bd-place">
+            <label for="bd-bp">Blueprint</label><select id="bd-bp" required></select>
+            <label for="bd-town">Town</label><select id="bd-town" required></select>
+            <label for="bd-pname">Name</label><input id="bd-pname" maxlength="60" placeholder="defaults to the blueprint's name">
+            <label for="bd-powner">Owner</label><select id="bd-powner"></select>
+            <div class="actions"><button type="submit">Place Building</button></div>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- ═════════════ REAL ESTATE ═════════════ -->
+    <div class="tab-panel" id="tab-realestate">
+      <div class="grid">
+        <section class="panel wide">
+          <h2>List a Building</h2>
+          <p class="muted small">Put any building on the market, as its owner (Crown property: the Crown sells, and the money leaves circulation).
+            Its store must be empty. Rent is per session and is collected every advance.</p>
+          <form id="re-list">
+            <label for="re-building">Building</label><select id="re-building" required></select>
+            <div class="row">
+              <div><label for="re-kind">Offer</label><select id="re-kind"><option value="sale">For sale</option><option value="lease">For rent</option></select></div>
+              <div><label for="re-price" id="re-price-label">Price</label><input id="re-price" type="number" min="0" step="any" required></div>
+              <div><label for="re-cur">Currency</label><select id="re-cur"></select></div>
+            </div>
+            <div class="re-term hidden"><label for="re-term">Term (sessions)</label><input id="re-term" type="number" min="0" step="any" placeholder="blank = open-ended"></div>
+            <label for="re-note">Note</label><input id="re-note" maxlength="300" placeholder="optional, shown to buyers">
+            <div class="actions"><button type="submit">List</button></div>
+          </form>
+        </section>
+
+        <section class="panel wide">
+          <h2>Listings</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Building</th><th>Deal</th><th>Seller</th><th>Status</th><th></th></tr></thead>
+              <tbody id="re-listings"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel wide">
+          <h2>Leases</h2>
+          <p class="muted small">Ending a lease hands the building back to its owner now; anything the tenant left in the store stays with it.
+            Leases also end by themselves when rent can't be paid, or when a fixed term runs out.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Building</th><th>Tenant</th><th>Landlord</th><th>Rent</th><th>Term</th><th></th></tr></thead>
+              <tbody id="re-leases"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ═════════════ LABOR ═════════════ -->
+    <div class="tab-panel" id="tab-labor">
+      <div class="grid">
+        <section class="panel wide">
+          <h2>Labor Pools</h2>
+          <p class="muted small">Each settlement's Working Age population by skill and status. Pools are created from population the first time
+            they're needed. Edit counts for migration, deaths, or people becoming unavailable. Employed can't drop below the workers on player payrolls.</p>
+          <div id="lp-list"></div>
+        </section>
+
+        <section class="panel">
+          <h2>Standard Wages</h2>
+          <p class="muted small">Reference weekly wage per worker. Employers can offer more or less when hiring. The handbook sets General Labor
+            at 8 CM/week and leaves Skilled and Specialist wages to you. A settlement override replaces the realm-wide rate there.</p>
+          <div class="table-wrap">
+            <table class="small">
+              <thead><tr><th>Where</th><th>Tier</th><th class="num">Per week</th><th></th></tr></thead>
+              <tbody id="wr-rows"></tbody>
+            </table>
+          </div>
+          <form id="wr-form" style="margin-top:.8rem">
+            <div class="row">
+              <div><label for="wr-scope">Where</label><select id="wr-scope"></select></div>
+              <div><label for="wr-tier">Tier</label>
+                <select id="wr-tier"><option value="general">General</option><option value="skilled">Skilled</option><option value="specialist">Specialist</option></select></div>
+            </div>
+            <div class="row">
+              <div><label for="wr-whole" id="wr-whole-label">Whole</label><input id="wr-whole" type="number" min="0" placeholder="0"></div>
+              <div><label for="wr-sub" id="wr-sub-label">Sub-units</label><input id="wr-sub" type="number" min="0" placeholder="0"></div>
+              <div><label for="wr-cur">Currency</label><select id="wr-cur"></select></div>
+            </div>
+            <div class="actions"><button type="submit">Set Wage</button></div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Defaults</h2>
+          <form id="ld-form">
+            <h3 class="small" style="margin:.2rem 0 0">Employment split (%)</h3>
+            <div class="row">
+              <div><label for="ld-emp">Employed</label><input id="ld-emp" type="number" min="0" max="100" step="any"></div>
+              <div><label for="ld-av">Available</label><input id="ld-av" type="number" min="0" max="100" step="any"></div>
+              <div><label for="ld-un">Unavailable</label><input id="ld-un" type="number" min="0" max="100" step="any"></div>
+            </div>
+            <h3 class="small" style="margin:.8rem 0 0">Skill split (%)</h3>
+            <div class="row">
+              <div><label for="ld-g">General</label><input id="ld-g" type="number" min="0" max="100" step="any"></div>
+              <div><label for="ld-s">Skilled</label><input id="ld-s" type="number" min="0" max="100" step="any"></div>
+              <div><label for="ld-sp">Specialists</label><input id="ld-sp" type="number" min="0" max="100" step="any"></div>
+            </div>
+            <p class="muted small">Used when a settlement's pool is created or reset. Each split must total 100%.</p>
+            <div class="actions"><button type="submit">Save Defaults</button></div>
+          </form>
+          <form id="wk-form" class="row tight" style="align-items:flex-end;gap:.8rem;margin-top:1rem;flex-wrap:wrap">
+            <div><label for="wk-weeks">Weeks per session</label><input id="wk-weeks" type="number" min="1" step="any" style="width:8rem"></div>
+            <div><button type="submit">Save</button></div>
+            <p class="muted small" style="flex-basis:100%;margin:.2rem 0 0">Wages accrue so one full session costs weekly wage × this number (handbook: 13).</p>
+          </form>
+        </section>
+
+        <section class="panel wide">
+          <h2>Workplaces</h2>
+          <p class="muted small">Where people work. Set the positions each one needs. Output follows the staffing bands:
+            100%+ staffed → 100%, 75–99 → 75%, 50–74 → 50%, 25–49 → 25%, under 25% → cannot operate. Missing Skilled or Specialist
+            workers cap output further. Workplaces are <strong>built through Construction</strong> (a project from a workplace blueprint); once one is finished, set it up below.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Workplace</th><th>Owner</th><th>Settlement</th><th class="num">Needs G / S / Sp</th><th class="num">Staffed</th><th class="num">Output</th><th></th></tr></thead>
+              <tbody id="wp-rows"></tbody>
+            </table>
+          </div>
+          <h3 style="margin-top:1.2rem" id="wp-form-title">Set up a Workplace</h3>
+          <p class="muted small hidden" id="wp-none">Nothing to set up yet. Start a project from a workplace blueprint in the <strong>Construction</strong> tab;
+            when its last milestone is delivered, the finished workplace appears here.</p>
+          <form id="wp-form">
+            <input type="hidden" id="wp-id">
+            <div class="param-grid">
+              <div style="grid-column: span 2"><label for="wp-pick">Workplace</label><select id="wp-pick" required></select></div>
+              <div style="grid-column: span 2"><label for="wp-name">Name</label><input id="wp-name" required maxlength="60"></div>
+              <div><label for="wp-owner">Owner</label><select id="wp-owner"></select></div>
+              <div><label for="wp-place">Settlement</label><select id="wp-place" disabled title="A building stays where it was built"></select></div>
+              <div><label for="wp-size">Size</label><select id="wp-size"></select></div>
+              <div><label for="wp-g">General needed</label><input id="wp-g" type="number" min="0" value="0"></div>
+              <div><label for="wp-s">Skilled needed</label><input id="wp-s" type="number" min="0" value="0"></div>
+              <div><label for="wp-sp">Specialists needed</label><input id="wp-sp" type="number" min="0" value="0"></div>
+              <div><label for="wp-pile">Linked stockpile</label><select id="wp-pile"></select></div>
+            </div>
+            <p class="help" id="wp-origin"></p>
+            <p class="help" id="wp-size-hint"></p>
+            <div class="param-grid" style="margin-top:.4rem">
+              <div><label for="wp-mode">Production</label>
+                <select id="wp-mode"><option value="none">None</option><option value="extract">Extraction (from a node)</option><option value="process">Processing (a recipe)</option></select></div>
+              <div class="wp-extract hidden" style="grid-column: span 2"><label for="wp-node">Resource node</label><select id="wp-node"></select></div>
+              <div class="wp-process hidden" style="grid-column: span 2"><label for="wp-recipe">Recipe</label><select id="wp-recipe"></select></div>
+              <div class="wp-prod hidden"><label for="wp-base" id="wp-base-label">Base output / session</label><input id="wp-base" type="number" min="0" step="any" value="0"></div>
+              <div class="wp-prod hidden" style="align-self:end"><label class="inline-check"><input type="checkbox" id="wp-producing" checked> Producing</label></div>
+            </div>
+            <p class="help wp-prod hidden">Output goes into (and inputs come from) the linked stockpile. Base output is at 100% staffing, before quality and accessibility.</p>
+            <label for="wp-notes">Notes</label><input id="wp-notes" maxlength="500" placeholder="Water-driven saws on the Varn millrace">
+            <label class="inline-check" style="margin-top:.6rem"><input type="checkbox" id="wp-active" checked> Open (closing releases all its workers)</label>
+            <div class="actions">
+              <button type="submit" id="wp-submit">Save Workplace</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- ═════════════ RESOURCES ═════════════ -->
+    <div class="tab-panel" id="tab-resources">
+      <div class="grid">
+        <section class="panel wide">
+          <h2>Resource Nodes</h2>
+          <p class="muted small">Deposits and renewable sources, one resource (RU good) each.
+            Output = Base Output × Staffing × Quality (Poor 0.75 · Normal 1 · Rich 1.25) × Accessibility (Easy 1.25 · Normal 1 · Difficult 0.75).
+            Finite nodes run down their reserve. Renewables lose yield when extracted above their sustainable limit and recover when rested.
+            Undiscovered nodes are hidden from players.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Node</th><th>Where</th><th>Resource</th><th>Quality / access</th><th class="num">Reserve / yield</th><th>Worked by</th><th></th></tr></thead>
+              <tbody id="nd-rows"></tbody>
+            </table>
+          </div>
+          <h3 style="margin-top:1.2rem" id="nd-form-title">Add a Node</h3>
+          <form id="nd-form">
+            <input type="hidden" id="nd-id">
+            <div class="param-grid">
+              <div style="grid-column: span 2"><label for="nd-name">Name</label><input id="nd-name" required maxlength="60" placeholder="Varn Hill Iron"></div>
+              <div><label for="nd-place">Settlement</label><select id="nd-place"></select></div>
+              <div><label for="nd-good">Resource (good)</label><select id="nd-good"></select></div>
+              <div><label for="nd-kind">Kind</label><select id="nd-kind"><option value="finite">Finite</option><option value="renewable">Renewable</option></select></div>
+              <div><label for="nd-quality">Quality</label><select id="nd-quality"><option value="poor">Poor ×0.75</option><option value="normal" selected>Normal ×1</option><option value="rich">Rich ×1.25</option></select></div>
+              <div><label for="nd-access">Accessibility</label><select id="nd-access"><option value="easy">Easy ×1.25</option><option value="normal" selected>Normal ×1</option><option value="difficult">Difficult ×0.75</option></select></div>
+            </div>
+            <div class="param-grid nd-finite">
+              <div><label for="nd-orig">Original reserve (RU)</label><input id="nd-orig" type="number" min="0"></div>
+              <div><label for="nd-left">Remaining reserve (RU)</label><input id="nd-left" type="number" min="0" placeholder="= original"></div>
+            </div>
+            <div class="param-grid nd-renew hidden">
+              <div><label for="nd-limit">Sustainable limit (RU/session)</label><input id="nd-limit" type="number" min="0" step="any" placeholder="none"></div>
+              <div><label for="nd-degrade">Yield lost per session over (%)</label><input id="nd-degrade" type="number" min="0" step="any" value="10"></div>
+              <div><label for="nd-regen">Yield regained per session under (%)</label><input id="nd-regen" type="number" min="0" step="any" value="5"></div>
+              <div><label for="nd-yield">Current yield (%)</label><input id="nd-yield" type="number" min="0" max="100" step="any" value="100"></div>
+            </div>
+            <label for="nd-notes">Notes</label><input id="nd-notes" maxlength="500">
+            <label class="inline-check" style="margin-top:.6rem"><input type="checkbox" id="nd-disc"> Discovered (visible to players)</label>
+            <label class="inline-check"><input type="checkbox" id="nd-active" checked> Active</label>
+            <div class="actions">
+              <button type="submit" id="nd-submit">Add Node</button>
+              <button type="button" class="ghost hidden" id="nd-cancel">Cancel Edit</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel wide">
+          <h2>Recipes</h2>
+          <p class="muted small">Production lines: input RU → output RU per batch. A processing workplace runs one recipe; its base output is batches per session.
+            Inputs must be in the workplace's linked stockpile. Inputs and outputs are exact, so nothing is created or lost by rounding.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Recipe</th><th>Inputs</th><th>Outputs</th><th>Needs</th><th>Used at</th><th></th></tr></thead>
+              <tbody id="rc-rows"></tbody>
+            </table>
+          </div>
+          <h3 style="margin-top:1.2rem" id="rc-form-title">Add a Recipe</h3>
+          <form id="rc-form">
+            <input type="hidden" id="rc-id">
+            <div class="row">
+              <div style="flex:2"><label for="rc-name">Name</label><input id="rc-name" required maxlength="60" placeholder="Bloomery Smelting"></div>
+              <div style="flex:3"><label for="rc-req">Requirements (technology, machinery)</label><input id="rc-req" maxlength="500" placeholder="Furnace, bellows, charcoal store"></div>
+            </div>
+            <label for="rc-desc">Description</label><input id="rc-desc" maxlength="500">
+            <div class="grid" style="gap:.4rem 1.4rem;margin-top:.6rem">
+              <div><h3 class="small">Inputs per batch</h3><div id="rc-in"></div><button type="button" class="ghost small" data-add="in">+ Input</button></div>
+              <div><h3 class="small">Outputs per batch</h3><div id="rc-out"></div><button type="button" class="ghost small" data-add="out">+ Output</button></div>
+            </div>
+            <label class="inline-check" style="margin-top:.6rem"><input type="checkbox" id="rc-active" checked> Active</label>
+            <div class="actions">
+              <button type="submit" id="rc-submit">Add Recipe</button>
+              <button type="button" class="ghost hidden" id="rc-cancel">Cancel Edit</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- ═════════════ EXCHANGE ═════════════ -->
+    <div class="tab-panel" id="tab-exchange">
+      <div class="grid">
+        <section class="panel wide">
+          <h2>Companies on the Exchange</h2>
+          <p class="muted small">Price per share = book value × confidence ÷ shares issued. Prices refresh every time you advance time,
+            or right now with <em>Revalue all</em>.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Company</th><th class="num">Shares</th><th class="num">Book value</th><th class="num">Confidence</th><th class="num">Price</th><th></th></tr></thead>
+              <tbody id="ex-rows"></tbody>
+            </table>
+          </div>
+          <div class="actions"><button type="button" class="ghost" id="ex-revalue">Revalue all now</button></div>
+        </section>
+
+        <section class="panel">
+          <h2>Valuation Levers</h2>
+          <form id="ex-val-form">
+            <label for="ex-co">Company</label><select id="ex-co"></select>
+            <div class="row">
+              <div><label for="ex-conf">Confidence</label><input id="ex-conf" type="number" step="0.01" min="0" placeholder="leave as is">
+                <p class="help" id="ex-conf-help"></p></div>
+              <div><label for="ex-other" id="ex-other-label">Other assets</label><input id="ex-other" type="number" min="0" step="any" placeholder="leave as is">
+                <p class="help">Buildings, charters, monopolies: anything not counted automatically.</p></div>
+            </div>
+            <div class="actions"><button type="submit">Save &amp; Revalue</button></div>
+          </form>
+          <p class="small muted" id="ex-breakdown"></p>
+        </section>
+
+        <section class="panel">
+          <h2>Share Register</h2>
+          <div class="table-wrap" style="max-height:220px;overflow:auto">
+            <table><thead><tr><th>Holder</th><th class="num">Shares</th></tr></thead><tbody id="ex-holders"></tbody></table>
+          </div>
+          <form id="ex-share-form" style="margin-top:.8rem">
+            <div class="row">
+              <div><label for="ex-action">Action</label>
+                <select id="ex-action">
+                  <option value="transfer">Transfer shares (no money)</option>
+                  <option value="issue">Issue new shares</option>
+                  <option value="retire">Retire (cancel) shares</option>
+                </select></div>
+              <div><label for="ex-qty">Shares</label><input id="ex-qty" type="number" min="1" value="100"></div>
+            </div>
+            <div class="row">
+              <div class="ex-from"><label for="ex-from">From</label><select id="ex-from"></select></div>
+              <div class="ex-to"><label for="ex-to">To</label><select id="ex-to"></select></div>
+            </div>
+            <p class="help" id="ex-action-help"></p>
+            <div class="actions"><button type="submit">Apply</button></div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Exchange Rules</h2>
+          <form id="ex-rules-form">
+            <div class="row">
+              <div><label for="xr-min">Lowest confidence</label><input id="xr-min" type="number" step="0.01" min="0.01" max="1"></div>
+              <div><label for="xr-max">Highest confidence</label><input id="xr-max" type="number" step="0.01" min="1" max="10"></div>
+            </div>
+            <div class="row">
+              <div><label for="xr-growth">Growth weight</label><input id="xr-growth" type="number" step="0.05" min="0" max="10"></div>
+              <div><label for="xr-div">Dividend weight</label><input id="xr-div" type="number" step="0.05" min="0" max="10"></div>
+              <div><label for="xr-trade">Trading weight</label><input id="xr-trade" type="number" step="0.05" min="0" max="10"></div>
+            </div>
+            <div class="row">
+              <div><label for="xr-rev">Pull to 1.0 per session</label><input id="xr-rev" type="number" step="0.05" min="0" max="1">
+                <p class="help">0.25 = a quarter of the way back each session.</p></div>
+              <div><label for="xr-new">Shares for a new company</label><input id="xr-new" type="number" min="1"></div>
+            </div>
+            <div class="actions"><button type="submit">Save Rules</button></div>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- ═════════════ SHIPPING ═════════════ -->
+    <div class="tab-panel" id="tab-shipping">
+      <div class="grid">
+        <section class="panel wide">
+          <h2>Shipping Rules</h2>
+          <p class="muted small">Players and NPC companies ship goods from a stockpile to a depot in another town. The sender picks how many days it takes, within these limits,
+            and pays freight in <span class="cur-name">the base currency</span>:
+            <em>rate × units × (1 + rush % × days faster than the slowest)</em>. The money leaves circulation. Nothing is lost on the way.</p>
+          <form id="sh-rules">
+            <div class="param-grid">
+              <div><label for="sh-rate" id="sh-rate-label">Freight per unit (slowest)</label><input id="sh-rate" type="number" min="0" step="any"></div>
+              <div><label for="sh-rush">Rush surcharge (% per day faster)</label><input id="sh-rush" type="number" min="0" step="any"></div>
+              <div><label for="sh-min">Fastest (days)</label><input id="sh-min" type="number" min="1" step="1"></div>
+              <div><label for="sh-max">Slowest (days)</label><input id="sh-max" type="number" min="1" step="1"></div>
+            </div>
+            <p class="help" id="sh-example"></p>
+            <div class="actions"><button type="submit">Save Rules</button></div>
+          </form>
+        </section>
+
+        <section class="panel wide">
+          <h2>Shipments</h2>
+          <p class="muted small">Everything on the way and recently delivered. A shipment <em>waiting</em> at a full or closed destination is delivered as soon as there is room,
+            or you can redirect it, deliver it now, or send it back.</p>
+          <div class="filter-row"><input type="search" id="sh-filter" placeholder="Search shipments, towns, owners, goods…" aria-label="Search shipments"></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Shipment</th><th>Goods</th><th>Arrives</th><th></th></tr></thead>
+              <tbody id="sh-rows"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ═════════════ CONSTRUCTION ═════════════ -->
+    <div class="tab-panel" id="tab-construction">
+      <div class="grid">
+        <section class="panel wide">
+          <h2>Projects</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Project</th><th>Owner</th><th>Where</th><th>Milestone</th><th class="num">Progress</th><th></th></tr></thead>
+              <tbody id="cp-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel wide">
+          <h2>Blueprints</h2>
+          <p class="muted small">What players can build. Each milestone is a list of materials that must all be delivered before the next begins
+            (e.g. Foundations: 1,000 Stone → Frame: 1,000 Wood). Tip: require <em>player-made</em> goods (processed materials NPC markets never restock)
+            so players must produce them.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Blueprint</th><th>Builds</th><th>Milestones</th><th class="num">Active projects</th><th></th></tr></thead>
+              <tbody id="bp-rows"></tbody>
+            </table>
+          </div>
+
+          <h3 style="margin-top:1.2rem" id="bp-form-title">New Blueprint</h3>
+          <form id="bp-form">
+            <input type="hidden" id="bp-id">
+            <div class="row">
+              <div style="flex:2"><label for="bp-name">Name</label><input id="bp-name" required maxlength="60" placeholder="Sawmill"></div>
+              <div><label for="bp-type">Builds</label>
+                <select id="bp-type"><option value="workplace">A workplace</option><option value="stockpile">A warehouse / depot</option><option value="none">A building only</option></select></div>
+            </div>
+            <label for="bp-desc">Description</label><input id="bp-desc" maxlength="1000">
+            <div class="param-grid bp-workplace" style="margin-top:.4rem">
+              <div><label for="bp-size">Size</label><select id="bp-size"></select></div>
+              <div><label for="bp-g">General needed</label><input id="bp-g" type="number" min="0" value="0"></div>
+              <div><label for="bp-s">Skilled needed</label><input id="bp-s" type="number" min="0" value="0"></div>
+              <div><label for="bp-sp">Specialists needed</label><input id="bp-sp" type="number" min="0" value="0"></div>
+              <div><label for="bp-recipe">Recipe (optional)</label><select id="bp-recipe"></select></div>
+              <div><label for="bp-base">Base batches / session</label><input id="bp-base" type="number" min="0" step="any" value="0"></div>
+              <div style="align-self:end"><label class="inline-check"><input type="checkbox" id="bp-store" checked> With its own store</label></div>
+              <div><label for="bp-storecap">Store capacity</label><input id="bp-storecap" type="number" min="0" placeholder="unlimited"></div>
+            </div>
+            <div class="param-grid bp-stockpile hidden" style="margin-top:.4rem">
+              <div><label for="bp-kind">Kind</label><select id="bp-kind"><option value="warehouse">Warehouse</option><option value="depot">Depot</option><option value="other">Other</option></select></div>
+              <div><label for="bp-cap">Capacity (units)</label><input id="bp-cap" type="number" min="0" placeholder="unlimited"></div>
+            </div>
+            <h3 class="small" style="margin:1rem 0 .2rem">Milestones</h3>
+            <div id="bp-ms"></div>
+            <button type="button" class="ghost small" id="bp-add-ms">+ Milestone</button>
+            <label class="inline-check" style="margin-top:.8rem"><input type="checkbox" id="bp-active" checked> Available to players</label>
+            <div class="actions">
+              <button type="submit" id="bp-submit">Save Blueprint</button>
+              <button type="button" class="ghost hidden" id="bp-cancel">Cancel Edit</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- ═════════════ MARKETS ═════════════ -->
+    <div class="tab-panel" id="tab-markets">
+      <div class="grid">
+        <section class="panel wide">
+          <h2>What's for Sale</h2>
+          <div class="row tight" style="align-items:flex-end;gap:.8rem;flex-wrap:wrap">
+            <div class="subtle-select" style="min-width:220px"><label for="mk-select">Market</label><select id="mk-select"></select></div>
+            <p class="muted small" id="mk-terms" style="margin:0 0 .5rem"></p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th class="check-col"><input type="checkbox" id="ls-all" aria-label="Select all listings"></th>
+                <th>Good</th><th class="num">Price now</th><th class="num">Normal / cap</th><th class="num">Stock</th>
+                <th class="num">Buying</th><th class="num">Swing</th><th>Event</th><th></th>
+              </tr></thead>
+              <tbody id="ls-rows"></tbody>
+            </table>
+          </div>
+          <div class="row tight bulk-bar" style="align-items:center;gap:.6rem;margin-top:.4rem">
+            <span class="small muted" id="ls-selected">None selected</span>
+            <button type="button" class="ghost small danger" id="ls-delete" disabled>Delete selected</button>
+            <span class="small muted">Deleting takes a good off sale here and erases its price history; open standing orders for it are cancelled. The good stays in the catalog and in everyone's stockpiles.</span>
+          </div>
+
+          <h3 style="margin-top:1.4rem" id="ls-title">Add a Good to this Market</h3>
+          <form id="ls-form">
+            <div class="param-grid">
+              <div style="grid-column: span 2"><label for="ls-good">Good</label><select id="ls-good" required></select></div>
+              <div><label for="ls-base-whole" id="ls-base-whole-label">Normal price</label><input id="ls-base-whole" type="number" min="0" value="0"></div>
+              <div><label for="ls-base-sub" id="ls-base-sub-label">sub-units</label><input id="ls-base-sub" type="number" min="0" value="0"></div>
+              <div class="ls-shop"><label for="ls-stock">On the shelf now</label><input id="ls-stock" type="number" min="0" value="0">
+                <p class="help">An opening shelf you give the shop.</p></div>
+              <div class="ls-shop"><label for="ls-target">Shelf target</label><input id="ls-target" type="number" min="0" value="100">
+                <p class="help">The shopkeeper restocks up to this.</p></div>
+              <div class="ls-shop"><label for="ls-restock">Buys wholesale / day</label><input id="ls-restock" type="number" min="0" step="any" value="5">
+                <p class="help">From bulk listings in town, up to the normal price.</p></div>
+              <div class="ls-bulk"><label for="ls-demand">Townsfolk buy / day</label><input id="ls-demand" type="number" min="0" step="any" value="0">
+                <p class="help">Taken from the cheapest listings at or below the price above. 0 = none (e.g. raw materials).</p></div>
+            </div>
+            <p class="help ls-bulk">On a bulk market there is no stock of its own: goods appear only when companies list them, at their own prices.</p>
+            <details style="margin-top:.6rem" class="ls-shop">
+              <summary class="small">Price behaviour</summary>
+              <div class="param-grid">
+                <div><label for="ls-vol">Daily swing (%)</label><input id="ls-vol" type="number" min="0" max="50" step="any" value="3">
+                  <p class="help">Random wobble each day.</p></div>
+                <div><label for="ls-rev">Pull to normal (%)</label><input id="ls-rev" type="number" min="0" max="100" step="any" value="5">
+                  <p class="help">How fast price returns to normal.</p></div>
+                <div><label for="ls-el">Scarcity effect</label><input id="ls-el" type="number" min="0" max="3" step="any" value="0.5">
+                  <p class="help">0 = stock doesn't matter, 1 = strong.</p></div>
+              </div>
+            </details>
+            <div id="ls-edit-only" class="hidden">
+              <div class="param-grid" style="margin-top:.4rem">
+                <div><label for="ls-trend">Event trend (%/day)</label><input id="ls-trend" type="number" min="-50" max="50" step="any" value="0">
+                  <p class="help">e.g. +2 during a blockade.</p></div>
+                <div><label for="ls-trend-days">…for days</label><input id="ls-trend-days" type="number" min="0" max="3650" value="0"></div>
+                <div style="align-self:center"><label class="inline-check" style="margin-top:1.2rem"><input type="checkbox" id="ls-active" checked> On sale</label></div>
+              </div>
+            </div>
+            <div class="actions">
+              <button type="submit" id="ls-submit">Add to Market</button>
+              <button type="button" class="ghost hidden" id="ls-cancel">Cancel Edit</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel wide">
+          <h2>Standing Orders</h2>
+          <p class="muted small">Players' open orders against NPC buyers and sellers. They fill day by day when you advance time.</p>
+          <div class="table-wrap" style="max-height:320px;overflow:auto">
+            <table>
+              <thead><tr><th>Owner</th><th>Order</th><th>Market</th><th class="num">Left</th><th class="num">Limit / unit</th><th>Last fill</th><th></th></tr></thead>
+              <tbody id="or-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel wide">
+          <h2>Bulk Import Goods</h2>
+          <p class="muted small">
+            Paste rows copied from Google Sheets or Excel (including the header row), or upload a CSV.
+            Only <strong>Name</strong> is required. Add <strong>Market</strong> + <strong>Price</strong> to put the good on sale there
+            (price in whole units of that market's currency, e.g. <span class="mono">2.5</span> = 2 ₵ 5 p).
+            Existing goods are updated; blank cells leave current values alone. If any row has a problem, nothing is imported.
+          </p>
+          <details class="small" style="margin:.4rem 0 .6rem">
+            <summary>Columns you can use</summary>
+            <div class="table-wrap"><table>
+              <thead><tr><th>Column</th><th>Meaning</th><th>Default</th></tr></thead>
+              <tbody>
+                <tr><td>Name</td><td>Good name (matched to existing goods, ignoring case)</td><td>required</td></tr>
+                <tr><td>Unit</td><td>sack, coil, log, each…</td><td>each</td></tr>
+                <tr><td>Category</td><td>Food, Gear, Materials…</td><td>General</td></tr>
+                <tr><td>Description</td><td>Shown to players</td><td>—</td></tr>
+                <tr><td>Type</td><td>raw (from resource nodes) · processed (factory-made, for industry and construction) · consumer (factory-made, sold in shops)</td><td>raw</td></tr>
+                <tr><td>Market</td><td>Market name (a bulk market or a goods shop) — creates/updates the listing there</td><td>—</td></tr>
+                <tr><td>Price</td><td>Whole units of the market's currency. Goods shop: normal price (and the most its shopkeeper pays wholesale). Bulk market: the most townsfolk pay.</td><td>required for a new listing</td></tr>
+                <tr><td>Stock</td><td>Goods shops only: an opening shelf. Ignored on bulk markets, where goods appear only when companies list them.</td><td>= Normal stock</td></tr>
+                <tr><td>Normal stock</td><td>Goods shops: the shelf target the shopkeeper restocks to</td><td>= Stock, or 100</td></tr>
+                <tr><td>Restock</td><td>Goods shops: units the shopkeeper buys wholesale per day. Bulk markets: units townsfolk buy per day.</td><td>5 (shops) / 0 (bulk)</td></tr>
+                <tr><td>Swing %</td><td>Daily random wobble</td><td>3</td></tr>
+                <tr><td>Pull %</td><td>Daily pull back to normal price</td><td>5</td></tr>
+                <tr><td>Scarcity</td><td>0–3, how much low stock raises price</td><td>0.5</td></tr>
+              </tbody>
+            </table></div>
+          </details>
+          <div class="actions" style="margin-top:0">
+            <button type="button" class="ghost small" id="im-template">Download template (CSV)</button>
+            <label class="btn ghost small">
+              Upload CSV… <input type="file" id="im-file" accept=".csv,.tsv,.txt,text/csv" hidden></label>
+            <button type="button" class="ghost small" id="im-clear">Clear</button>
+          </div>
+          <textarea id="im-text" rows="6" class="mono" style="margin-top:.6rem;font-size:.85rem"
+            placeholder="Name&#9;Unit&#9;Category&#9;Market&#9;Price&#9;Stock&#10;Grain&#9;sack&#9;Food&#9;Grand Market&#9;0.8&#9;400"></textarea>
+          <p class="small" id="im-status"></p>
+          <ul class="small debit hidden" id="im-errors" style="max-height:180px;overflow:auto"></ul>
+          <div class="table-wrap hidden" id="im-preview-wrap" style="max-height:320px;overflow:auto">
+            <table><thead id="im-head"></thead><tbody id="im-rows"></tbody></table>
+          </div>
+          <div class="actions">
+            <button type="button" id="im-check" disabled>Check</button>
+            <button type="button" id="im-go" disabled>Import</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Markets</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Market</th><th></th></tr></thead>
+              <tbody id="mk-rows"></tbody>
+            </table>
+          </div>
+          <h3 style="margin-top:1.2rem" id="mk-form-title">Open a Market</h3>
+          <form id="mk-form">
+            <input type="hidden" id="mk-id">
+            <label for="mk-kind">Type</label>
+            <select id="mk-kind">
+              <option value="bulk">Bulk market — companies trade by the shipload</option>
+              <option value="shop">Goods shop — players buy &amp; sell for themselves</option>
+            </select>
+            <label for="mk-name">Name</label><input id="mk-name" required maxlength="40" placeholder="Port Varn Docks">
+            <label for="mk-place">In settlement</label><select id="mk-place" required></select>
+            <label for="mk-desc">Description</label><input id="mk-desc" maxlength="300">
+            <div class="row">
+              <div><label for="mk-cur">Currency</label><select id="mk-cur"></select></div>
+              <div><label for="mk-sort">Sort order</label><input id="mk-sort" type="number" value="0"></div>
+            </div>
+            <div class="row mk-shop-only">
+              <div><label for="mk-markup">Shop markup (%)</label><input id="mk-markup" type="number" min="0" max="500" step="any" value="10"></div>
+              <div><label for="mk-buyback">Buy-back (% of price)</label><input id="mk-buyback" type="number" min="0" max="100" step="any" value="80"></div>
+            </div>
+            <div class="row mk-bulk-only">
+              <div><label for="mk-fee">Market fee (%)</label><input id="mk-fee" type="number" min="0" max="50" step="any" value="2">
+                <p class="help">Crown's cut of bulk trades and standing orders.</p></div>
+              <div><label for="mk-impact">Bulk price impact</label><input id="mk-impact" type="number" min="0" max="5" step="any" value="0.5">
+                <p class="help">0 = big orders don't move price; 1 = full scarcity curve.</p></div>
+            </div>
+            <fieldset class="mk-purse">
+              <legend class="small">NPC buyers' purse</legend>
+              <label class="inline-check"><input type="checkbox" id="mk-limited"> Limited purse <span class="small muted">(off = NPCs can always pay)</span></label>
+              <div class="row" id="mk-purse-fields">
+                <div><label for="mk-refill">Refill / session</label><input id="mk-refill" type="number" min="0" step="any" value="0"></div>
+                <div><label for="mk-cap">Cap</label><input id="mk-cap" type="number" min="0" step="any" placeholder="none"></div>
+                <div><label for="mk-now">Set purse now</label><input id="mk-now" type="number" min="0" step="any" placeholder="leave as is"></div>
+              </div>
+              <p class="help">Whole units of the market currency. Players' spending here also flows back in.</p>
+            </fieldset>
+            <label class="inline-check" style="margin-top:.6rem"><input type="checkbox" id="mk-active" checked> Open</label>
+            <p class="notice small hidden" id="mk-cur-warning">Changing the currency re-prices everything here so real values stay the same.</p>
+            <div class="actions">
+              <button type="submit" id="mk-submit">Open Market</button>
+              <button type="button" class="ghost hidden" id="mk-cancel">Cancel Edit</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel">
+          <h2>Goods Catalog</h2>
+          <div class="table-wrap" style="max-height:320px;overflow:auto">
+            <table>
+              <thead><tr><th>Good</th><th>Unit</th><th>Category</th><th>Sold in</th><th></th></tr></thead>
+              <tbody id="gd-rows"></tbody>
+            </table>
+          </div>
+          <h3 style="margin-top:1.2rem" id="gd-form-title">Add a Good</h3>
+          <form id="gd-form">
+            <input type="hidden" id="gd-id">
+            <div class="row">
+              <div style="flex:2"><label for="gd-name">Name</label><input id="gd-name" required maxlength="40" placeholder="Pepper"></div>
+              <div><label for="gd-unit">Unit</label><input id="gd-unit" maxlength="20" placeholder="sack" value="each"></div>
+            </div>
+            <label for="gd-cat">Category</label><input id="gd-cat" maxlength="30" placeholder="Spices" list="gd-cats">
+            <datalist id="gd-cats"></datalist>
+            <label for="gd-desc">Description</label><input id="gd-desc" maxlength="300">
+            <p class="help" style="margin-top:.5rem">Where a good is sold depends on the markets that list it: bulk markets serve companies, goods shops serve players.</p>
+            <label for="gd-kind">Type</label>
+            <select id="gd-kind">
+              <option value="raw">Raw material: extracted from a resource node</option>
+              <option value="processed">Processed good: made in a factory, used by industry and construction</option>
+              <option value="consumer">Consumer good: made in a factory, sold to people in shops</option>
+            </select>
+            <label class="inline-check"><input type="checkbox" id="gd-active" checked> Active</label>
+            <div class="actions">
+              <button type="submit" id="gd-submit">Add Good</button>
+              <button type="button" class="ghost hidden" id="gd-cancel">Cancel Edit</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
+
+    <!-- ═════════════ CURRENCIES ═════════════ -->
+    <div class="tab-panel" id="tab-currencies">
+      <section class="panel">
+        <h2>Currencies</h2>
+        <p class="muted small">
+          All balances are stored in each currency's smallest unit. Rates are measured against the
+          <strong>base</strong> currency, which prices goods across the site.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Currency</th><th>Code</th><th>Sub-unit</th><th class="num">Per unit</th><th class="num">Rate</th><th></th>
+            </tr></thead>
+            <tbody id="cur-rows"></tbody>
+          </table>
+        </div>
+
+        <h3 style="margin-top:1.4rem" id="cur-form-title">Add a Currency</h3>
+        <form id="cur-form">
+          <input type="hidden" id="cur-id">
+          <div class="row">
+            <div><label for="cur-name">Name</label><input id="cur-name" required maxlength="30" placeholder="Florin"></div>
+            <div><label for="cur-code">Code</label><input id="cur-code" required maxlength="5" class="mono" placeholder="FL"></div>
+            <div><label for="cur-symbol">Symbol</label><input id="cur-symbol" required maxlength="4" placeholder="ƒ"></div>
+          </div>
+          <div class="row">
+            <div><label for="cur-subname">Sub-unit name</label><input id="cur-subname" required maxlength="20" placeholder="stiver"></div>
+            <div><label for="cur-subsym">Sub-unit symbol</label><input id="cur-subsym" required maxlength="4" placeholder="st"></div>
+            <div><label for="cur-per">Sub-units per unit</label><input id="cur-per" type="number" min="1" max="10000" required value="10"></div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="cur-rate" id="cur-rate-label">Worth of 1 unit, in base units</label>
+              <input id="cur-rate" type="number" min="0" step="any" required value="1">
+            </div>
+            <div><label for="cur-sort">Sort order</label><input id="cur-sort" type="number" value="0"></div>
+          </div>
+          <p class="notice small hidden" id="cur-per-warning">
+            If you change <em>sub-units per unit</em>, every balance and past entry in this currency is rescaled so
+            its value stays the same (rounded to the nearest sub-unit).
+          </p>
+          <div class="actions">
+            <button type="submit" id="cur-submit">Add Currency</button>
+            <button type="button" class="ghost hidden" id="cur-cancel">Cancel Edit</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <!-- ═════════════ ACCOUNTS ═════════════ -->
+    <div class="tab-panel" id="tab-accounts">
+      <section class="panel">
+        <h2>Accounts</h2>
+        <p class="muted small">Click anyone to open their profile: names, password, GM rights, company roles, money and goods, all in one place.</p>
+        <div class="filter-row"><input type="search" id="acct-filter" placeholder="Search names, usernames, companies…" aria-label="Search accounts">
+          <label class="inline-check small"><input type="checkbox" id="acct-show-disabled"> Show disabled</label>
+          <span class="count" id="acct-count"></span></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Player</th><th>Status</th><th>Companies</th><th class="num">Purse</th><th>Last sign-in</th><th></th></tr></thead>
+            <tbody id="user-rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- ═════════════ SETTINGS ═════════════ -->
+    <div class="tab-panel" id="tab-settings">
+      <div class="grid">
+        <section class="panel">
+          <h2>Campaign Join Code</h2>
+          <p class="muted small">Give this to players so they can open an account.</p>
+          <div class="joincode" id="joincode">····-····</div>
+          <label class="inline-check"><input type="checkbox" id="reg-open"> Registration open</label>
+          <div class="actions">
+            <button class="ghost" id="copy-code">Copy</button>
+            <button class="ghost" id="new-code">Generate New Code</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2>Site</h2>
+          <form id="site-form">
+            <label for="site-name">Site name</label>
+            <input id="site-name" maxlength="40" required>
+            <div class="actions"><button type="submit">Save</button></div>
+          </form>
+          <form id="fee-form" style="margin-top:1rem">
+            <label for="fee-pct">Money-changer fee (%)</label>
+            <input id="fee-pct" type="number" min="0" max="50" step="0.5">
+            <p class="muted small">Taken from every currency exchange players make. 0 = free.</p>
+            <div class="actions"><button type="submit">Save Fee</button></div>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+  <script type="module" src="js/gm.js"></script>
+</body>
+</html>

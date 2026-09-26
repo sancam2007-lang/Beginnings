@@ -1,25 +1,15 @@
 {
-  "name": "beginnings",
+  "name": "beginnings-exchange",
+  "version": "0.12.6",
   "private": true,
-  "version": "0.1.0",
   "type": "module",
+  "description": "Economic emulator for the Beginnings campaign — accounts, currencies, markets, and a charter-company exchange.",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "dev": "netlify dev"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.4",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.2"
-  },
-  "devDependencies": {
-    "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.3.2",
-    "typescript": "^5.5.4",
-    "vite": "^5.4.8"
+    "@neondatabase/serverless": "^1.0.0",
+    "bcryptjs": "^3.0.2",
+    "ws": "^8.21.3"
   }
 }
