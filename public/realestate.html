@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Real Estate — Beginnings Exchange</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main>
+    <h1>Real Estate</h1>
+    <p class="muted">Buildings for sale and for rent: workplaces with their stores, warehouses and depots, and other buildings.
+      Buy for yourself or for a company you serve. Workers stay on with the building; a building's store must be empty before it changes hands.</p>
+
+    <div class="grid">
+    <section class="panel wide">
+      <h2>On the Market</h2>
+      <div class="filter-row">
+        <input type="search" id="mk-filter" placeholder="Search by name, town, kind…" aria-label="Search listings">
+        <select id="mk-kind" aria-label="Deal"><option value="">Sale and rent</option><option value="sale">For sale</option><option value="lease">For rent</option></select>
+      </div>
+      <div id="market" class="estate-grid"><p class="muted">Loading…</p></div>
+    </section>
+
+    <section class="panel wide">
+      <h2>Your Property</h2>
+      <p class="muted small">Buildings you or your companies own. List one for sale or for rent; while it's rented, the tenant runs it and pays rent every advance.</p>
+      <div id="owned"></div>
+    </section>
+
+    <section class="panel wide">
+      <h2>What You Rent</h2>
+      <p class="muted small">Rent is paid each time the GM advances time. If it can't be paid, the lease ends and anything left inside stays with the building. Empty the store before you move out.</p>
+      <div id="renting"></div>
+    </section>
+    </div>
+  </main>
+  <script type="module" src="js/realestate.js"></script>
+</body>
+</html>
